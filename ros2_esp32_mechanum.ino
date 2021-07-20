@@ -1,8 +1,7 @@
 #include <ros2arduino.h>
 #include <user_config.h>
 
-#include <WiFi.h>
-#include <WiFiUdp.h>
+#define XRCEDDS_PORT  Serial 
 
 #define MOTOR1_A  A14
 #define MOTOR1_B  A15
@@ -27,7 +26,7 @@ int linear_y = 0;//speed y [m]
 int linear_z = 0;//speed y [m]
 int angle_z  = 0;//speed z [rad/s]
 int spd1, spd2, spd3, spd4 = 0;
-WiFiUDP udp;
+//WiFiUDP udp;
 
 // ROS Subscribe function (twist_dataの受信)=========================
 void messageCb(const geometry_msgs::Twist *twist, void* arg) {
@@ -94,12 +93,12 @@ void calc_mecanum(int Vx, int Vy, int wl)
 
   if(abs(spd1) <15)  spd1 = 0;  if(abs(spd2) <15)  spd2 = 0;
   if(abs(spd3) <15)  spd3 = 0;  if(abs(spd4) <15)  spd4 = 0;
-  Serial.print("x:");
-  Serial.print(Vx);
-  Serial.print("  y:");
-  Serial.print(Vy);
-  Serial.print("  wl");
-  Serial.println(wl);
+//  Serial.print("x:");
+//  Serial.print(Vx);
+//  Serial.print("  y:");
+//  Serial.print(Vy);
+//  Serial.print("  wl");
+//  Serial.println(wl);
   send_data(spd1,spd2,spd3,spd4);
 }
 
@@ -115,20 +114,24 @@ class sub_twist : public ros2::Node
 void setup()
 { 
   //WiFi Configure======================
-  Serial.begin(115200);
-  WiFi.begin(SSID,PASSWORD);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("...");
-  }
-  ros2::init(&udp, SERVER, agent);
+//  Serial.begin(115200);
+//  WiFi.begin(SSID,PASSWORD);
+//  while (WiFi.status() != WL_CONNECTED)
+//  {
+//    Serial.println("...");
+//  }
+//  ros2::init(&udp, SERVER, agent);
+  XRCEDDS_PORT.begin(115200);
+  while (!XRCEDDS_PORT); 
+
+  ros2::init(&XRCEDDS_PORT);
   
   motor_setup();
 }
 void loop()
 {
   static sub_twist sub;
-  Serial.println(WiFi.status());
+//  Serial.println(WiFi.status());
   //calc_mecanum(linear_x, linear_y, angle_z);
   ros2::spin(&sub);
 }
